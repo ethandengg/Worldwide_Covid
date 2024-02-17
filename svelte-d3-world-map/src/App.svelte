@@ -1,12 +1,14 @@
 <script>
-	export let name;
-</script>
-
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
-
+	export let name = 'World';
+	import WorldMap from './WorldMap.svelte';
+  </script>
+  
+  <main>
+	<h1>WorldWide Covid Data</h1>
+	<p>A Visualizaiton of how covid took over the world, here is the data we used <a href="https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download">Covid Data</a>.</p>
+	<WorldMap />
+  </main>
+  
 <style>
 	main {
 		text-align: center;
@@ -19,7 +21,7 @@
 		color: #ff3e00;
 		text-transform: uppercase;
 		font-size: 4em;
-		font-weight: 100;
+		font-weight: 3000;
 	}
 
 	@media (min-width: 640px) {
