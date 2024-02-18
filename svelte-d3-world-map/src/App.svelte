@@ -1,6 +1,7 @@
 <script>
 	export let name = 'World';
 	import WorldMap from './WorldMap.svelte';
+	let daysCount;
   </script>
   
   <main>
@@ -8,7 +9,7 @@
 	<p>A Visualizaiton of how covid took over the world, here is the data we used <a href="https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download">Covid Data</a>.</p>
 	<input type="range" min="0" max="daysCount" value="0" id="timeSlider" step="1">
 	<label for="timeSlider" id="sliderLabel">Date: </label>
-	<WorldMap />
+	<WorldMap/>
   </main>
   
 <style>
@@ -49,7 +50,7 @@
 		appearance: none;
 		width: 25px; /* Adjust the thumb width as needed */
 		height: 25px; /* Adjust the thumb height as needed */
-		background: #4CAF50; /* Thumb color */
+		background: #33752B; /* Thumb color */
 		cursor: pointer;
 	}
 	#timeSlider::-moz-range-thumb {

@@ -5,9 +5,15 @@
     let svg;
     let projection;
     let path;
-    let worldData; // This will hold the loaded GeoJSON data
-    let covidData; // This will hold the processed COVID-19 data
-  
+    let worldData; // GeoJSON Data
+    let covidData; // COVID-19 Data
+    let dates; 
+    let daysCount; 
+
+    const colorScale = d3.scaleLinear()
+            .domain([0, 10000, 50000, 100000, 500000, 1000000])
+            .range(["#99F98E", "#yellowgreen", "#yellow", "#orange", "#red", "#darkred"]);
+
     onMount(async () => {
         // Load the GeoJSON data for the world map
         worldData = await d3.json('globe.geo.json');
@@ -15,6 +21,8 @@
         // Load and process the COVID-19 CSV data
         const covidCsvData = await d3.csv('Covid_data/full_grouped.csv');
         covidData = processCovidData(covidCsvData);
+        dates = Object.keys(covidData[Object.keys(covidData)[0]]); // Assuming all countries have the same dates
+        daysCount = dates.length - 1;
     
         // Define the map projection
         projection = d3.geoMercator()
@@ -26,10 +34,6 @@
         // Inside your onMount function, after loading data and setting up the map
 
         // Select the tooltip element using D3
-        const tooltip = d3.select('.tooltip');
-        const dates = Object.keys(covidData[Object.keys(covidData)[0]]); // Assuming all countries have the same dates
-        const daysCount = dates.length - 1;
-
         document.getElementById('timeSlider').max = daysCount;
 
         document.getElementById('timeSlider').addEventListener('input', function() {
@@ -37,30 +41,10 @@
             document.getElementById('sliderLabel').textContent = `Date: ${currentDate}`;
             updateMap(currentDate);
         });
-
-
-  
-      // Draw the map
+        
       drawMap();
+      updateMap(dates[0]);
     });
-
-
-    function updateMap(currentDate) {
-        console.log('Current date:', currentDate);
-
-        d3.select(svg)
-            .selectAll('path')
-            .attr('fill', d => {
-                const countryData = covidData[d.properties.name];
-                const cases = countryData ? countryData[currentDate] : 0;
-
-                console.log(d.properties.name, cases, colorScale(cases)); // Log the country, cases, and color
-
-                return colorScale(cases);
-            });
-    }
-
-
 
 
 
@@ -81,30 +65,39 @@
     }
 
 
-
-    const colorScale = d3.scaleLinear()
-        .domain([0, 10000, 50000, 100000, 500000, 1000000]) // Adjust based on your data
-        .range(["#99F98E", "#yellowgreen", "#yellow", "#orange", "#red", "#darkred"]); // Start with light green
-
+    
     function drawMap() {
         const tooltip = d3.select('.tooltip');
-
         d3.select(svg)
             .selectAll('path')
             .data(worldData.features)
             .enter()
             .append('path')
             .attr('d', path)
-            .attr('fill', '#99F98E') // Set all countries to light green
+            .attr('fill', '#99F98E') // Initial light green color
             .on('mouseover', function(event, d) {
-                tooltip.style('visibility', 'visible')
-                    .text(d.properties.name);
+                tooltip.style('visibility', 'visible').text(d.properties.name);
             })
             .on('mousemove', function(event) {
-                tooltip.style('left', `${event.pageX + 15}px`)
-                    .style('top', `${event.pageY - 25}px`);
+                tooltip.style('left', `${event.pageX + 15}px`).style('top', `${event.pageY - 25}px`);
+            })
+            .on('mouseout', function() {
+                tooltip.style('visibility', 'hidden');
             });
     }
+
+    function updateMap(currentDate) {
+        d3.select(svg)
+            .selectAll('path')
+            .transition() // Optional: add a transition for smooth color change
+            .duration(500) // Duration of the transition in milliseconds
+            .attr('fill', d => {
+            const countryData = covidData[d.properties.name];
+            const cases = countryData && countryData[currentDate] ? countryData[currentDate] : 0;
+            return colorScale(cases);
+            });
+        }
+
     
     </script>
   

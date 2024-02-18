@@ -75,5 +75,6 @@ button:focus {
     opacity: 0.9;
     position: absolute;
     visibility: hidden; /* Start hidden and only show on hover */
+	z-index: 10;
 }
 
