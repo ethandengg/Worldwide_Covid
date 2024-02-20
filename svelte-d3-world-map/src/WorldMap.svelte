@@ -9,29 +9,27 @@
     let covidData; // COVID-19 Data
     let dates; 
     let daysCount; 
+    let tooltip;
 
     const colorScale = d3.scaleLinear()
             .domain([0, 10000, 50000, 100000, 500000, 1000000])
             .range(["#1FFB09", "#F9F208", "#F5BE16", "#F56016", "#F51616", "#A10707"]);
 
     onMount(async () => {
-        // Load the GeoJSON data for the world map
         worldData = await d3.json('globe.geo.json');
-    
-        // Load and process the COVID-19 CSV data
         const covidCsvData = await d3.csv('Covid_data/full_grouped.csv');
         covidData = processCovidData(covidCsvData);
-        dates = Object.keys(covidData[Object.keys(covidData)[0]]); // Assuming all countries have the same dates
+        dates = Object.keys(covidData[Object.keys(covidData)[0]]);
         daysCount = dates.length - 1;
     
-        // Define the map projection
+        // map projection
         projection = d3.geoMercator()
             .scale(100)
             .translate([svg.clientWidth / 2, svg.clientHeight / 2]);
     
-        // Define the path generator
         path = d3.geoPath().projection(projection);
-        // Inside your onMount function, after loading data and setting up the map
+        tooltip = d3.select('.tooltip');
+        
 
         // Select the tooltip element using D3
         document.getElementById('timeSlider').max = daysCount;
@@ -67,9 +65,7 @@
 
     
     function drawMap() {
-        const tooltip = d3.select('.tooltip');
-        const mostRecentDate = dates[dates.length - 1];
-        d3.select(svg)
+        const paths = d3.select(svg)
             .selectAll('path')
             .data(worldData.features)
             .enter()
@@ -77,21 +73,26 @@
             .attr('d', path)
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
-                const cases = countryData && countryData[mostRecentDate] ? countryData[mostRecentDate] : 0;
+                const cases = countryData && countryData[dates[0]] ? countryData[dates[0]] : 0;
                 return colorScale(cases);
-            })
-            .on('mouseover', function(event, d) {
+            });
+
+        // Attach event listeners
+        paths.on('mouseover', (event, d) => {
                 const countryData = covidData[d.properties.name];
-                const firstDate = dates[0]; // Assuming you want to show the data for the first date
-                const cases = countryData && countryData[firstDate] ? countryData[firstDate] : 0;
+                const cases = countryData && countryData[dates[0]] ? countryData[dates[0]] : '0';
                 tooltip
+                    .style('left', `${event.pageX + 15}px`)
+                    .style('top', `${event.pageY + 15}px`)
                     .style('visibility', 'visible')
                     .html(`<strong>${d.properties.name}</strong><br/>Cases: ${cases}`);
             })
-            .on('mousemove', function(event) {
-                tooltip.style('left', `${event.pageX + 15}px`).style('top', `${event.pageY - 25}px`);
+            .on('mousemove', (event) => {
+                tooltip
+                    .style('left', `${event.pageX + 15}px`)
+                    .style('top', `${event.pageY + 15}px`);
             })
-            .on('mouseout', function() {
+            .on('mouseout', () => {
                 tooltip.style('visibility', 'hidden');
             });
     }
@@ -106,34 +107,36 @@
         };
         d3.select(svg)
             .selectAll('path')
-            .transition() // Optional: add a transition for smooth color change
-            .duration(500) // Duration of the transition in milliseconds
+            .transition()
+            .duration(500)
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
                 const cases = countryData && countryData[currentDate] ? countryData[currentDate] : 0;
                 return colorScale(cases);
-            })
-            // Reattach the mouseover event to update the tooltip
-            .on('mouseover', updateTooltip)
-            .on('mousemove', function(event) {
-                tooltip
-                    .style('left', `${event.pageX + 15}px`)
-                    .style('top', `${event.pageY - 25}px`);
-            })
-            .on('mouseout', function() {
-                tooltip.style('visibility', 'hidden');
+            });
+
+        // Update tooltip content without redefining event listeners
+        d3.select(svg)
+            .selectAll('path')
+            .each(function(d) {
+                const countryData = covidData[d.properties.name];
+                const cases = countryData && countryData[currentDate] ? countryData[currentDate] : '0';
+                d3.select(this)
+                    .on('mouseover', (event) => {
+                        tooltip
+                            .style('left', `${event.pageX + 15}px`)
+                            .style('top', `${event.pageY + 15}px`)
+                            .style('visibility', 'visible')
+                            .html(`<strong>${d.properties.name}</strong><br/>Cases: ${cases}`);
+                    });
             });
     }
 
-
-
-
-    
     </script>
   
     <svg bind:this={svg} width="100%" height="100%" viewBox="200 200 700 700"></svg>
 
-    <div class="tooltip"></div>
+    <div class="tooltip" bind:this={tooltip}></div>
 
 
   
