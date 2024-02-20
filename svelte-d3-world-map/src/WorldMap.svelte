@@ -1,3 +1,5 @@
+
+
 <script>
     import { onMount } from 'svelte';
     import * as d3 from 'd3';
@@ -40,8 +42,8 @@
             updateMap(currentDate);
         });
         
-      drawMap();
-      updateMap(dates[0]);
+        drawMap();
+        updateMap(dates[0]);
     });
 
 
@@ -50,6 +52,8 @@
         let processedData = {};
         csvData.forEach(d => {
             const cases = parseInt(d.Confirmed) || 0;
+            const deaths = parseInt(d.Deaths) || 0;
+            const recovered = parseInt(d.Recovered) || 0;
             const date = d.Date;
             const country = d['Country/Region'];
 
@@ -57,7 +61,7 @@
                 processedData[country] = {};
             }
 
-            processedData[country][date] = cases;
+            processedData[country][date] = { cases, deaths, recovered };
         });
         return processedData;
     }
@@ -73,19 +77,19 @@
             .attr('d', path)
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
-                const cases = countryData && countryData[dates[0]] ? countryData[dates[0]] : 0;
-                return colorScale(cases);
+                const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
+                return colorScale(data.cases);
             });
 
         // Attach event listeners
         paths.on('mouseover', (event, d) => {
                 const countryData = covidData[d.properties.name];
-                const cases = countryData && countryData[dates[0]] ? countryData[dates[0]] : '0';
+                const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
                 tooltip
                     .style('left', `${event.pageX + 15}px`)
                     .style('top', `${event.pageY + 15}px`)
                     .style('visibility', 'visible')
-                    .html(`<strong>${d.properties.name}</strong><br/>Cases: ${cases}`);
+                    .html(`<strong>${d.properties.name}</strong><br/>Cases: ${data.cases}<br/>Deaths: ${data.deaths}<br/>Recovered: ${data.recovered}`);
             })
             .on('mousemove', (event) => {
                 tooltip
@@ -98,46 +102,40 @@
     }
 
     function updateMap(currentDate) {
-        const updateTooltip = (event, d) => {
-            const countryData = covidData[d.properties.name];
-            const cases = countryData && countryData[currentDate] ? countryData[currentDate] : 0;
-            tooltip
-                .style('visibility', 'visible')
-                .html(`<strong>${d.properties.name}</strong><br/>Cases: ${cases}`);
-        };
-        d3.select(svg)
-            .selectAll('path')
-            .transition()
+        const paths = d3.select(svg).selectAll('path');
+
+        // Transition colors
+        paths.transition()
             .duration(500)
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
-                const cases = countryData && countryData[currentDate] ? countryData[currentDate] : 0;
-                return colorScale(cases);
+                const data = countryData && countryData[currentDate] ? countryData[currentDate] : { cases: 0, deaths: 0, recovered: 0 };
+                return colorScale(data.cases); // Use the current date's data for the color scale
             });
 
-        // Update tooltip content without redefining event listeners
-        d3.select(svg)
-            .selectAll('path')
-            .each(function(d) {
-                const countryData = covidData[d.properties.name];
-                const cases = countryData && countryData[currentDate] ? countryData[currentDate] : '0';
-                d3.select(this)
-                    .on('mouseover', (event) => {
-                        tooltip
-                            .style('left', `${event.pageX + 15}px`)
-                            .style('top', `${event.pageY + 15}px`)
-                            .style('visibility', 'visible')
-                            .html(`<strong>${d.properties.name}</strong><br/>Cases: ${cases}`);
-                    });
-            });
+        // Reattach tooltip event listeners
+        paths.on('mouseover', (event, d) => {
+            const countryData = covidData[d.properties.name];
+            const data = countryData && countryData[currentDate] ? countryData[currentDate] : { cases: 'No data', deaths: 'No data', recovered: 'No data' };
+            tooltip
+                .style('left', `${event.pageX + 15}px`)
+                .style('top', `${event.pageY + 15}px`)
+                .style('visibility', 'visible')
+                .html(`<strong>${d.properties.name}</strong><br/>Cases: ${data.cases}<br/>Deaths: ${data.deaths}<br/>Recovered: ${data.recovered}`);
+        })
+        .on('mousemove', (event) => {
+            tooltip
+                .style('left', `${event.pageX + 15}px`)
+                .style('top', `${event.pageY + 15}px`);
+        })
+        .on('mouseout', () => {
+            tooltip.style('visibility', 'hidden');
+        });
     }
 
-    </script>
-  
-    <svg bind:this={svg} width="100%" height="100%" viewBox="200 200 700 700"></svg>
 
-    <div class="tooltip" bind:this={tooltip}></div>
-
-
+</script>
   
-  
+<svg bind:this={svg} width="100%" height="100%" viewBox="200 200 700 700"></svg>
+
+<div class="tooltip" bind:this={tooltip}></div>
