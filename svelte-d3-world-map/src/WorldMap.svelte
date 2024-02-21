@@ -99,7 +99,7 @@
                 const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
                 return colorScale(data.cases);
             })
-            .attr('stroke', '#FFF') // Set the stroke color to black
+            .attr('stroke', '#85F5CC') // Set the stroke color to black
             .attr('stroke-width', 0.5); // Set the stroke width
 
         // Attach event listeners
