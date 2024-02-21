@@ -29,8 +29,8 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v2
         with:
-          # this should match the `pages` option in your adapter-static options
-          path: 'build/'
+          # This should match the `pages` option in your adapter-static options
+          path: 'svelte-d3-world-map/public/build/'
 
   deploy:
     needs: build_site
