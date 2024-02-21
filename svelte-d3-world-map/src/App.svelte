@@ -13,11 +13,14 @@
   </main>
   
 <style>
+	@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Oswald:wght@200..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
 	main {
 		text-align: center;
 		padding: 1em;
 		width: 100%;
 		margin: 0 auto;
+		font-family: 'Rubik', sans-serif; /* Change the font-family as needed */
 	}
 
 	h1 {
@@ -25,12 +28,12 @@
 		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 3000;
+		font-family: 'DM Serif Display', serif; /* Change the font-family as needed */
 	}
 
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
+	p {
+		font-family: 'Oswald', sans-serif; /* Change the font-family as needed */
+		font-size: 1.3em; /* Adjust the size as needed */
 	}
 
 	#timeSlider {

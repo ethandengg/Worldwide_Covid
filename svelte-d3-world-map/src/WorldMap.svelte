@@ -15,7 +15,25 @@
 
     const colorScale = d3.scaleLinear()
             .domain([0, 10000, 50000, 100000, 500000, 1000000])
-            .range(["#1FFB09", "#F9F208", "#F5BE16", "#F56016", "#F51616", "#A10707"]);
+            .range(["#316754", "#F9F208", "#F5BE16", "#F56016", "#F51616", "#A10707"]);
+
+    function setProjectionAndPath() {
+    // Remove the scaling based on svg.clientWidth / svg.clientHeight
+    // The viewBox will handle scaling, so we only need to focus on centering the map
+
+    projection = d3.geoMercator()
+        .center([0, 0]) // Adjust this to change the initial centering of the map, if necessary
+        .scale(100) // Set a default scale; this will be scaled according to the viewBox
+        .translate([550, 550]); // Translate to the center of the viewBox dimensions
+
+    path = d3.geoPath().projection(projection);
+    drawMap(); // Redraw the map with the new projection settings
+    }
+
+    window.addEventListener('resize', () => {
+    setProjectionAndPath();
+    updateMap(dates[0]); // Make sure to pass the correct current date
+    });
 
     onMount(async () => {
         worldData = await d3.json('globe.geo.json');
@@ -42,6 +60,7 @@
             updateMap(currentDate);
         });
         
+        setProjectionAndPath();
         drawMap();
         updateMap(dates[0]);
     });
@@ -79,7 +98,9 @@
                 const countryData = covidData[d.properties.name];
                 const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
                 return colorScale(data.cases);
-            });
+            })
+            .attr('stroke', '#FFF') // Set the stroke color to black
+            .attr('stroke-width', 0.5); // Set the stroke width
 
         // Attach event listeners
         paths.on('mouseover', (event, d) => {
@@ -100,6 +121,7 @@
                 tooltip.style('visibility', 'hidden');
             });
     }
+
 
     function updateMap(currentDate) {
         const paths = d3.select(svg).selectAll('path');
