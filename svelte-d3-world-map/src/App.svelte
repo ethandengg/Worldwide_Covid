@@ -37,29 +37,29 @@
 	}
 
 	#timeSlider {
-		width: 80%; /* Adjust the width as needed */
-		height: 25px; /* Adjust the height as needed */
-		-webkit-appearance: none; /* Override default appearance */
-		appearance: none;
-		outline: none;
-		opacity: 0.7;
-		transition: opacity 0.2s;
-	}
-	#timeSlider:hover {
-		opacity: 1; /* Fully opaque on hover */
-	}
-	#timeSlider::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 25px; /* Adjust the thumb width as needed */
-		height: 25px; /* Adjust the thumb height as needed */
-		background: #33752B; /* Thumb color */
-		cursor: pointer;
-	}
-	#timeSlider::-moz-range-thumb {
-		width: 25px; /* Adjust the thumb width as needed */
-		height: 25px; /* Adjust the thumb height as needed */
-		background: #4CAF50; /* Thumb color */
-		cursor: pointer;
-	}
+        background: linear-gradient(to right, #ddd 0%, #ddd 100%); 
+        width: 50%; 
+        border-radius: 10px; 
+    }
+
+    #timeSlider::-moz-range-track {
+        width: 100%;
+        height: 8px;
+        background: #ffffff;
+        border-radius: 10px;
+    }
+    #timeSlider::-webkit-slider-thumb {
+        transition: background-color 0.3s ease-in-out;
+        transform: translate3d(0, 0, 0);
+    }
+    #timeSlider::-moz-range-thumb {
+          transition: background-color 0.3s ease-in-out;
+        transform: translate3d(0, 0, 0);
+    }
+    #sliderLabel {
+        display: block;
+        margin-top: 10px; 
+        font-size: 1.1em;
+        color: #333;
+    }
 </style>
